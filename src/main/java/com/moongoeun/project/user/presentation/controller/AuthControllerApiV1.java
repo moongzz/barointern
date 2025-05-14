@@ -4,7 +4,7 @@ import com.moongoeun.project.global.response.ResDTO;
 import com.moongoeun.project.user.application.dto.request.ReqAuthPostJoinDTOApiV1;
 import com.moongoeun.project.user.application.dto.response.ResAuthGetRefreshDTOApiV1;
 import com.moongoeun.project.user.application.dto.response.ResAuthPostJoinDTOApiV1;
-import com.moongoeun.project.user.domain.entity.UserEntity;
+import com.moongoeun.project.user.application.service.AuthServiceApiV1;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/auth")
 public class AuthControllerApiV1 {
 
+    private final AuthServiceApiV1 authServiceApiV1;
+
     @PostMapping("/join")
     public ResponseEntity<ResDTO<ResAuthPostJoinDTOApiV1>> joinBy(
         @Valid
         @RequestBody ReqAuthPostJoinDTOApiV1 dto
     ) {
-        ResAuthPostJoinDTOApiV1 data = ResAuthPostJoinDTOApiV1.of(UserEntity.builder().build());
+        ResAuthPostJoinDTOApiV1 data = authServiceApiV1.joinBy(dto);
 
         return new ResponseEntity<>(
             ResDTO.<ResAuthPostJoinDTOApiV1>builder()
