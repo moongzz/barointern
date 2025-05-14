@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class UserEntity {
-    private Long id;
     private String username;
     private String password;
     private String nickname;
