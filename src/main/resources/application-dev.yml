@@ -4,3 +4,6 @@ spring:
 springdoc:
   swagger-ui:
     path: /docs
+    urls:
+      - name: Project
+        url: /springdoc/openapi3project.json
