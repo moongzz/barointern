@@ -2,6 +2,7 @@ package com.moongoeun.project.user.infrastructure.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moongoeun.project.global.exception.CustomException;
+import com.moongoeun.project.global.exception.ExceptionResponse;
 import com.moongoeun.project.user.application.dto.request.ReqAuthPostLoginDTOApiV1;
 import com.moongoeun.project.user.application.dto.response.ResAuthPostLoginDTOApiV1;
 import com.moongoeun.project.user.application.exception.AuthExceptionCode;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -68,7 +70,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     ) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
 
-        String accessToken = jwtUtil.createAccessToken(userDetails.getId(), userDetails.getRoles(), userDetails.getNickname());
+        String accessToken = jwtUtil.createAccessToken(userDetails.getId(), userDetails.getRoles(),
+            userDetails.getNickname());
         String refreshToken = jwtUtil.createRefreshToken(accessToken);
 
         sendSuccessResponse(response, accessToken, refreshToken);
@@ -80,7 +83,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         HttpServletResponse response,
         AuthenticationException failed
     ) {
-        throw new CustomException(AuthExceptionCode.AUTHENTICATION_FAILED);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ExceptionResponse body = new ExceptionResponse(
+            AuthExceptionCode.AUTHENTICATION_FAILED.getCode(),
+            AuthExceptionCode.AUTHENTICATION_FAILED.getMessage(),
+            AuthExceptionCode.AUTHENTICATION_FAILED.getStatus().value()
+        );
+
+        try {
+            response.getWriter().write(new ObjectMapper().writeValueAsString(body));
+        } catch (IOException e) {
+            log.error("로그인 실패 응답 처리 중 오류 발생: {}", e.getMessage());
+        }
     }
 
     private void sendSuccessResponse(HttpServletResponse response, String accessToken,
