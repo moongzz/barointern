@@ -9,4 +9,8 @@ public interface UserRepository {
     Optional<UserEntity> findByUsername(String username);
 
     Optional<UserEntity> findByNickname(String nickname);
+
+    Optional<Long> findIdByUserEntity(UserEntity userEntity);
+
+    Optional<UserEntity> findById(Long id);
 }

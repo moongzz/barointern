@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public class UserRepositoryImpl implements UserRepository {
 
     private static final Map<Long, UserEntity> store = new ConcurrentHashMap<>();
-    private final AtomicLong sequence = new AtomicLong(0);
+    private final AtomicLong sequence = new AtomicLong(1);
 
     @Override
     public UserEntity save(UserEntity userEntity) {
@@ -32,5 +32,18 @@ public class UserRepositoryImpl implements UserRepository {
         return store.values().stream()
             .filter(user -> user.getNickname().equals(nickname))
             .findFirst();
+    }
+
+    @Override
+    public Optional<Long> findIdByUserEntity(UserEntity userEntity) {
+        return store.entrySet().stream()
+            .filter(entry -> entry.getValue().equals(userEntity))
+            .map(Map.Entry::getKey)
+            .findFirst();
+    }
+
+    @Override
+    public Optional<UserEntity> findById(Long id) {
+        return Optional.ofNullable(store.get(id));
     }
 }
