@@ -9,7 +9,12 @@ import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moongoeun.project.user.application.dto.request.ReqAuthPostJoinDTOApiV1;
+import com.moongoeun.project.user.application.dto.request.ReqAuthPostLoginDTOApiV1;
+import com.moongoeun.project.user.application.dto.request.ReqAuthPostLoginDTOApiV1.User;
 import com.moongoeun.project.user.application.exception.AuthExceptionCode;
+import com.moongoeun.project.user.domain.entity.UserEntity;
+import com.moongoeun.project.user.domain.repository.UserRepository;
+import com.moongoeun.project.user.domain.vo.RoleType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -17,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -31,6 +37,10 @@ public class AuthControllerApiV1Test {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     public void testAuthPostJoinSuccess() throws Exception {
@@ -66,6 +76,15 @@ public class AuthControllerApiV1Test {
 
     @Test
     public void testAuthPostJoinFail() throws Exception {
+        UserEntity userEntity = UserEntity.of(
+            "username(JoinFailTest)",
+            "password(JoinFailTest)",
+            "nickname(JoinFailTest)",
+            new RoleType[]{RoleType.USER}
+        );
+
+        userRepository.save(userEntity);
+
         ReqAuthPostJoinDTOApiV1 dto = ReqAuthPostJoinDTOApiV1.builder()
             .user(
                 ReqAuthPostJoinDTOApiV1.User.builder()
@@ -82,20 +101,80 @@ public class AuthControllerApiV1Test {
                     .contentType(MediaType.APPLICATION_JSON)
             )
             .andExpectAll(
-                MockMvcResultMatchers.status().isCreated()
-            );
-
-        mockMvc.perform(
-                RestDocumentationRequestBuilders.post("/v1/auth/join")
-                    .content(dtoToJson(dto))
-                    .contentType(MediaType.APPLICATION_JSON)
-            )
-            .andExpectAll(
                 MockMvcResultMatchers.status()
                     .is(AuthExceptionCode.DUPLICATE_USERNAME.getStatus().value())
             )
             .andDo(
                 MockMvcRestDocumentationWrapper.document("회원 가입 실패",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    resource(ResourceSnippetParameters.builder()
+                        .tag("AUTH v1")
+                        .build()
+                    )
+                )
+            );
+    }
+
+    @Test
+    public void testAuthPostLoginSuccess() throws Exception {
+        UserEntity userEntity = UserEntity.of(
+            "username(LoginSuccessTest)",
+            passwordEncoder.encode("password(LoginSuccessTest)"),
+            "nickname(LoginSuccessTest)",
+            new RoleType[]{RoleType.USER}
+        );
+        userRepository.save(userEntity);
+
+        ReqAuthPostLoginDTOApiV1 dto = new ReqAuthPostLoginDTOApiV1(
+            new User("username(LoginSuccessTest)", "password(LoginSuccessTest)")
+        );
+
+        mockMvc.perform(
+                RestDocumentationRequestBuilders.post("/v1/auth/login")
+                    .content(dtoToJson(dto))
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpectAll(
+                MockMvcResultMatchers.status().isOk()
+            )
+            .andDo(
+                MockMvcRestDocumentationWrapper.document("로그인 성공",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    resource(ResourceSnippetParameters.builder()
+                        .tag("AUTH v1")
+                        .build()
+                    )
+                )
+            );
+    }
+
+    @Test
+    public void testAuthPostLoginFail() throws Exception {
+        UserEntity userEntity = UserEntity.of(
+            "username(LoginFailTest)",
+            passwordEncoder.encode("password(LoginFailTest)"),
+            "nickname(LoginFailTest)",
+            new RoleType[]{RoleType.USER}
+        );
+        userRepository.save(userEntity);
+
+        ReqAuthPostLoginDTOApiV1 dto = new ReqAuthPostLoginDTOApiV1(
+            new User("username(LoginFailTest)", "password(LoginSuccessTest)")
+        );
+
+        mockMvc.perform(
+                RestDocumentationRequestBuilders.post("/v1/auth/login")
+                    .content(dtoToJson(dto))
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpectAll(
+                MockMvcResultMatchers.status()
+                    .is(AuthExceptionCode.AUTHENTICATION_FAILED.getStatus().value())
+            )
+            .andDo(
+                MockMvcRestDocumentationWrapper.document("로그인 실패",
                     preprocessRequest(prettyPrint()),
                     preprocessResponse(prettyPrint()),
                     resource(ResourceSnippetParameters.builder()
