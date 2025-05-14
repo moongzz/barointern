@@ -7,3 +7,7 @@ springdoc:
     urls:
       - name: Project
         url: /springdoc/openapi3project.json
+
+jwt:
+  secret:
+    key: "67CU66Gc7J247YS06rO87KCc7Iuc7YGs66a/7YKk7J6F64uI64uk7JWE7JWE7JWE7JWZ"
