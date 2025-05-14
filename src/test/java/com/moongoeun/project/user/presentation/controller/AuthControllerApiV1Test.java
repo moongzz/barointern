@@ -9,6 +9,7 @@ import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moongoeun.project.user.application.dto.request.ReqAuthPostJoinDTOApiV1;
+import com.moongoeun.project.user.application.exception.AuthExceptionCode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -90,7 +91,8 @@ public class AuthControllerApiV1Test {
                     .contentType(MediaType.APPLICATION_JSON)
             )
             .andExpectAll(
-                MockMvcResultMatchers.status().isCreated()
+                MockMvcResultMatchers.status()
+                    .is(AuthExceptionCode.DUPLICATE_USERNAME.getStatus().value())
             )
             .andDo(
                 MockMvcRestDocumentationWrapper.document("회원 가입 실패",
