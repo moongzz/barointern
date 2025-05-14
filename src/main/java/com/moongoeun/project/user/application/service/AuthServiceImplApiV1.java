@@ -40,12 +40,12 @@ public class AuthServiceImplApiV1 implements AuthServiceApiV1 {
     }
 
     private UserEntity saveUser(User reqUser) {
-        UserEntity userEntity = UserEntity.builder()
-            .username(reqUser.getUsername())
-            .password(passwordEncoder.encode(reqUser.getPassword()))
-            .nickname(reqUser.getNickname())
-            .roles(new RoleType[]{RoleType.USER})
-            .build();
+        UserEntity userEntity = UserEntity.of(
+            reqUser.getUsername(),
+            passwordEncoder.encode(reqUser.getPassword()),
+            reqUser.getNickname(),
+            new RoleType[]{RoleType.USER}
+        );
         return userRepository.save(userEntity);
     }
 }

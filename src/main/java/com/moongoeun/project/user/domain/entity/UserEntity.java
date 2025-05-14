@@ -14,7 +14,7 @@ public class UserEntity {
     private String nickname;
     private RoleType[] roles;
 
-    @Builder
+    @Builder(access = AccessLevel.PRIVATE)
     private UserEntity(
         String username,
         String password,
