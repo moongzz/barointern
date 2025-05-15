@@ -15,8 +15,13 @@ import com.moongoeun.project.user.application.exception.AuthExceptionCode;
 import com.moongoeun.project.user.domain.entity.UserEntity;
 import com.moongoeun.project.user.domain.repository.UserRepository;
 import com.moongoeun.project.user.domain.vo.RoleType;
+import com.moongoeun.project.user.infrastructure.jwt.JwtUtil;
+import com.moongoeun.project.user.infrastructure.userdetails.UserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +38,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("dev")
 public class AuthControllerApiV1Test {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthControllerApiV1Test.class);
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -41,6 +47,10 @@ public class AuthControllerApiV1Test {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsServiceImpl;
+    @Value("${jwt.secret.key}")
+    String secretKey;
 
     @Test
     public void testAuthPostJoinSuccess() throws Exception {
@@ -175,6 +185,95 @@ public class AuthControllerApiV1Test {
             )
             .andDo(
                 MockMvcRestDocumentationWrapper.document("로그인 실패",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    resource(ResourceSnippetParameters.builder()
+                        .tag("AUTH v1")
+                        .build()
+                    )
+                )
+            );
+    }
+
+    @Test
+    public void testAuthGetRefreshSuccess() throws Exception {
+        UserEntity userEntity = UserEntity.of(
+            "username(RefreshSuccessTest)",
+            passwordEncoder.encode("password(RefreshSuccessTest)"),
+            "nickname(RefreshSuccessTest)",
+            new RoleType[]{RoleType.USER}
+        );
+        userRepository.save(userEntity);
+
+        JwtUtil jwtUtil = new JwtUtil(userDetailsServiceImpl, secretKey);
+
+        String accessToken = jwtUtil.createAccessToken(
+            1L,
+            new RoleType[]{RoleType.USER},
+            "nickname(RefreshSuccessTest)"
+        );
+
+        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        String refreshToken = jwtUtil.createRefreshToken(accessToken);
+
+        mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/v1/auth/refresh")
+                    .param("accessToken", accessToken)
+                    .param("refreshToken", refreshToken)
+            )
+            .andExpectAll(
+                MockMvcResultMatchers.status().isOk()
+            )
+            .andDo(
+                MockMvcRestDocumentationWrapper.document("토큰 재발급 성공",
+                    preprocessRequest(prettyPrint()),
+                    preprocessResponse(prettyPrint()),
+                    resource(ResourceSnippetParameters.builder()
+                        .tag("AUTH v1")
+                        .build()
+                    )
+                )
+            );
+    }
+
+    @Test
+    public void testAuthGetRefreshFail() throws Exception {
+        UserEntity userEntity = UserEntity.of(
+            "username(RefreshFailTest)",
+            passwordEncoder.encode("password(RefreshFailTest)"),
+            "nickname(RefreshFailTest)",
+            new RoleType[]{RoleType.USER}
+        );
+        userRepository.save(userEntity);
+
+        JwtUtil jwtUtil = new JwtUtil(userDetailsServiceImpl, secretKey);
+
+        String accessToken = jwtUtil.createToken(
+            "ACCESS",
+            1L,
+            new RoleType[]{RoleType.USER},
+            "nickname(RefreshFailTest)",
+            300L
+        );
+        String refreshToken = jwtUtil.createToken(
+            "REFRESH",
+            1L,
+            new RoleType[]{RoleType.USER},
+            "nickname(RefreshSuccessTest)",
+            0L
+        );
+
+        mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/v1/auth/refresh")
+                    .param("accessToken", accessToken)
+                    .param("refreshToken", refreshToken)
+            )
+            .andExpectAll(
+                MockMvcResultMatchers.status()
+                    .is(AuthExceptionCode.EXPIRED_TOKEN.getStatus().value())
+            )
+            .andDo(
+                MockMvcRestDocumentationWrapper.document("토큰 재발급 실패",
                     preprocessRequest(prettyPrint()),
                     preprocessResponse(prettyPrint()),
                     resource(ResourceSnippetParameters.builder()
