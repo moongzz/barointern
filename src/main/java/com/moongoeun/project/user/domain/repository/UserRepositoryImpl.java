@@ -46,4 +46,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<UserEntity> findById(Long id) {
         return Optional.ofNullable(store.get(id));
     }
+
+    @Override
+    public void update(Long userId, UserEntity updateUser) {
+        store.put(userId, updateUser);
+    }
 }

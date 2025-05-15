@@ -13,4 +13,6 @@ public interface UserRepository {
     Optional<Long> findIdByUserEntity(UserEntity userEntity);
 
     Optional<UserEntity> findById(Long id);
+
+    void update(Long userId, UserEntity updateUser);
 }
