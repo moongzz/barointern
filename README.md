@@ -10,7 +10,7 @@
 
 4️⃣ 애플리케이션을 **AWS EC2**에 배포하고, 실제 환경에서 실행되도록 구성한다.
 
-## 공통 요구사항
+## ✔️ 공통 요구사항
 
 1️⃣ 기본으로 설정된 서버의 주소와 포트는 `0.0.0.0:8080` 이고, 이를 수정하지 않는다.
 
@@ -18,7 +18,7 @@
 
 3️⃣ 실제 데이터베이스나 파일 시스템을 사용하지 않으며, 모든 데이터는 메모리 내에서 처리된다.
 
-## 실행 방법
+## 🏁 실행 방법
 배포 주소: 54.180.29.228
 
 초기 관리자 아이디입니다.  
@@ -41,7 +41,7 @@ pw: adminpassword
 
 </details>
 
-## API 명세
+## 📊 API 명세
 http://54.180.29.228:8080/docs 에서 Swagger를 확인할 수 있습니다.
 
 <details>
@@ -204,3 +204,13 @@ Authorization: Bearer <access_token>
 }
 ```
 </details>
+
+## ✏️ 기록
+
+#### 트러블슈팅
+
+- [예외 상황에서 반환되는 상태 코드가 기대값과 다른 문제](https://github.com/moongzz/barointern/wiki/%EC%98%88%EC%99%B8-%EC%83%81%ED%99%A9%EC%97%90%EC%84%9C-%EB%B0%98%ED%99%98%EB%90%98%EB%8A%94-%EC%83%81%ED%83%9C-%EC%BD%94%EB%93%9C%EA%B0%80-%EA%B8%B0%EB%8C%80%EA%B0%92%EA%B3%BC-%EB%8B%A4%EB%A5%B8-%EB%AC%B8%EC%A0%9C)
+
+#### 기술적 의사결정
+
+- [ConcurrentHashMap vs HashMap](https://github.com/moongzz/barointern/wiki/ConcurrentHashMap-vs-HashMap)
