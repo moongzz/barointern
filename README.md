@@ -18,16 +18,31 @@
 
 3️⃣ 실제 데이터베이스나 파일 시스템을 사용하지 않으며, 모든 데이터는 메모리 내에서 처리된다.
 
-## 테스트 방법
-54.180.29.228:8080으로 실행할 수 있습니다.
+## 실행 방법
+배포 주소: 54.180.29.228
 
 초기 관리자 아이디입니다.  
 id: admin  
 pw: adminpassword
 
+<details>
+<summary>로컬 실행 방법</summary>
+  이 저장소를 클론합니다.
+  
+  ```bash
+  git clone https://github.com/moongzz/barointern.git
+  ```
+
+  아래 명령어로 실행합니다.
+
+  ```bash
+  ./gradlew bootrun
+  ```
+
+</details>
 
 ## API 명세
-54.180.29.228:8080/docs에서 Swagger를 확인할 수 있습니다.
+http://54.180.29.228:8080/docs 에서 Swagger를 확인할 수 있습니다.
 
 <details>
 <summary>AUTH API</summary>
