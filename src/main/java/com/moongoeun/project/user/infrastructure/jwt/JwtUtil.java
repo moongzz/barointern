@@ -10,12 +10,14 @@ import com.moongoeun.project.user.infrastructure.userdetails.UserDetailsImpl;
 import com.moongoeun.project.user.infrastructure.userdetails.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.util.Date;
+import java.util.List;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,6 +66,7 @@ public class JwtUtil {
 
     public ResAuthGetRefreshDTOApiV1 validateRefreshToken(String accessToken, String refreshToken) {
         String accessTokenSubject = extractSubject(accessToken);
+        validateToken(refreshToken);
         Claims refreshTokenClaims = getClaimsFrom(refreshToken);
 
         if (!accessTokenSubject.equals(refreshTokenClaims.getSubject())) {
@@ -98,6 +101,24 @@ public class JwtUtil {
             .compact();
     }
 
+    public void validateToken(String token) {
+        try {
+            getClaimsFrom(removeBearerPrefix(token));
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token, 만료된 JWT token 입니다.");
+            throw new CustomException(AuthExceptionCode.EXPIRED_TOKEN);
+        } catch (SecurityException | MalformedJwtException e) {
+            log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+            throw new CustomException(AuthExceptionCode.INVALID_SIGNATURE);
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+            throw new CustomException(AuthExceptionCode.UNSUPPORTED_JWT);
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+            throw new CustomException(AuthExceptionCode.EMPTY_CLAIMS);
+        }
+    }
+
     private Date getExpiryDateFromNow(Long expiresIn) {
         return new Date(System.currentTimeMillis() + expiresIn * 1000);
     }
@@ -120,20 +141,25 @@ public class JwtUtil {
     }
 
     private Claims getClaimsFrom(String token) {
-        try {
-            return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        } catch (ExpiredJwtException e) {
-            throw new CustomException(AuthExceptionCode.EXPIRED_TOKEN);
-        } catch (JwtException e) {
-            throw new CustomException(AuthExceptionCode.INVALID_JWT_TOKEN);
-        }
+        return Jwts.parserBuilder()
+            .setSigningKey(secretKey)
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
     }
 
     private boolean isTokenExpired(Date expiration) {
         return expiration.before(new Date());
+    }
+
+    public String getUserIdFrom(String token) {
+        return getClaimsFrom(token).get(JwtClaim.USER_ID.getName(), String.class);
+    }
+
+    public RoleType[] getRolesFrom(String token) {
+        List<String> roleList = getClaimsFrom(token).get(JwtClaim.ROLES.getName(), List.class);
+        return roleList.stream()
+            .map(role -> RoleType.valueOf(role.replace("ROLE_", "")))
+            .toArray(RoleType[]::new);
     }
 }
