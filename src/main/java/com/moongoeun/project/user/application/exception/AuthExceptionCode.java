@@ -17,6 +17,9 @@ public enum AuthExceptionCode implements ExceptionCode {
 
     AUTHENTICATION_FAILED("A401", "인증에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.", HttpStatus.UNAUTHORIZED),
     PASSWORD_NOT_MATCH("A402", "비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_SUBJECT_MISMATCH("A403", "AccessToken과 RefreshToken의 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    EXPIRED_TOKEN("A404", "만료된 Token입니다. 재로그인을 요청해주세요.", HttpStatus.UNAUTHORIZED),
+    INVALID_JWT_TOKEN("A405", "JWT가 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     USER_NOT_FOUND("A501", "존재하지 않는 회원 아이디입니다.", HttpStatus.NOT_FOUND),
     ;
