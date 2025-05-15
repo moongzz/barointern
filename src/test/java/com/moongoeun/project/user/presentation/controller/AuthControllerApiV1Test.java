@@ -18,8 +18,6 @@ import com.moongoeun.project.user.domain.vo.RoleType;
 import com.moongoeun.project.user.infrastructure.jwt.JwtUtil;
 import com.moongoeun.project.user.infrastructure.userdetails.UserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -38,7 +36,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("dev")
 public class AuthControllerApiV1Test {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthControllerApiV1Test.class);
     @Autowired
     private MockMvc mockMvc;
     @Autowired
