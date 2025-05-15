@@ -1,10 +1,12 @@
 package com.moongoeun.project.user.infrastructure.config;
 
 import com.moongoeun.project.user.infrastructure.jwt.JwtAuthenticationFilter;
+import com.moongoeun.project.user.infrastructure.jwt.JwtAuthorizationFilter;
 import com.moongoeun.project.user.infrastructure.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -36,6 +38,8 @@ public class AuthSecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/v1/auth/**").permitAll()
+
+                .requestMatchers(HttpMethod.PATCH, "/v1/users/*/admin").hasRole("USER")
                 .anyRequest().authenticated()
             );
 
@@ -44,6 +48,7 @@ public class AuthSecurityConfig {
         );
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -64,5 +69,10 @@ public class AuthSecurityConfig {
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
+    }
+
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter() throws Exception {
+        return new JwtAuthorizationFilter(jwtUtil);
     }
 }
