@@ -26,6 +26,7 @@ public class AuthSecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,7 +40,7 @@ public class AuthSecurityConfig {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/v1/auth/**").permitAll()
 
-                .requestMatchers(HttpMethod.PATCH, "/v1/users/*/admin").hasRole("USER")
+                .requestMatchers(HttpMethod.PATCH, "/v1/users/*/admin").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );
 
@@ -49,6 +50,8 @@ public class AuthSecurityConfig {
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.exceptionHandling(exception ->
+            exception.accessDeniedHandler(customAccessDeniedHandler));
 
         return http.build();
     }
