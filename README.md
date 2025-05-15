@@ -18,5 +18,174 @@
 
 3️⃣ 실제 데이터베이스나 파일 시스템을 사용하지 않으며, 모든 데이터는 메모리 내에서 처리된다.
 
-## 실행 방법
+## 테스트 방법
+54.180.29.228:8080으로 실행할 수 있습니다.
+
+초기 관리자 아이디입니다.  
+id: admin  
+pw: adminpassword
+
+
 ## API 명세
+54.180.29.228:8080/docs에서 Swagger를 확인할 수 있습니다.
+
+<details>
+<summary>AUTH API</summary>
+
+### 🔐 회원 가입
+
+- **URL**: `/v1/auth/join`
+- **Method**: `POST`
+- **Content-Type**: `application/json;charset=UTF-8`
+
+#### ✅ 요청 예시 (성공)
+```json
+{
+  "user": {
+    "username": "username(JoinSuccessTest)",
+    "password": "password(JoinSuccessTest)",
+    "nickname": "nickname(JoinSuccessTest)"
+  }
+}
+```
+
+#### ❌ 요청 예시 (실패)
+중복된 사용자
+```json
+{
+  "user": {
+    "username": "username(JoinFailTest)",
+    "password": "password(JoinFailTest)",
+    "nickname": "nickname(JoinFailTest)"
+  }
+}
+```
+
+#### 🔄 응답 예시
+
+201 Created
+
+```json
+{
+  "code": "0",
+  "message": "회원가입에 성공하였습니다.",
+  "data": {
+    "user": {
+      "username": "username(JoinSuccessTest)",
+      "nickname": "nickname(JoinSuccessTest)"
+    }
+  }
+}
+```
+
+409 Conflict
+
+```json
+{
+  "code": "A101",
+  "message": "이미 존재하는 사용자입니다.",
+  "httpStatus": 409
+}
+```
+
+
+### 🔐 로그인
+- **URL**: `/v1/auth/login`
+- **Method**: `POST`
+- **Content-Type**: `application/json;charset=UTF-8`
+
+#### ✅ 요청 예시 (성공)
+```json
+{
+  "user": {
+    "username": "username(LoginSuccessTest)",
+    "password": "password(LoginSuccessTest)"
+  }
+}
+```
+
+#### ❌ 요청 예시 (실패)
+```json
+{
+  "user": {
+    "username": "username(LoginFailTest)",
+    "password": "password(LoginSuccessTest)"
+  }
+}
+```
+
+#### 🔄 응답 예시
+200 OK
+```json
+{
+  "accessToken": "Bearer <access_token>",
+  "refreshToken": "<refresh_token>"
+}
+```
+401 Unauthorized
+
+```json
+{
+  "code": "A401",
+  "message": "인증에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.",
+  "httpStatus": 401
+}
+```
+
+### 🔄 토큰 재발급
+- **URL**: `/v1/auth/refresh`
+- **Method**: `GET`
+- **Content-Type**: `application/json;charset=UTF-8`
+
+
+#### 🔄 응답 예시
+200 OK
+```json
+{
+  "code": "0",
+  "message": "Access Token 재발급 성공했습니다.",
+  "data": {
+    "accessToken": "Bearer <new_access_token>"
+  }
+}
+```
+
+401 Unauthorized
+```json
+{
+  "code": "A404",
+  "message": "만료된 Token입니다. 재로그인을 요청해주세요.",
+  "httpStatus": 401
+}
+```
+</details>
+
+<details>
+<summary>USER API</summary>
+
+### 🛠️ 회원 권한 수정
+
+- **URL**: `/v1/users/{id}/admin`
+- **Method**: `PATCH`
+- **Path Parameter**: `id (Long) — 유저 ID`
+
+
+
+Authorization: Bearer <access_token>
+
+#### 🔄 응답 예시
+200 OK
+
+```json
+{
+    "code": "0",
+    "message": "권한 수정 성공했습니다.",
+    "data": {
+        "user": {
+            "id": 1,
+            "role": "ADMIN"
+        }
+    }
+}
+```
+</details>

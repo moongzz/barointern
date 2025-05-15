@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: project
+springdoc:
+  swagger-ui:
+    path: /docs
+    urls:
+      - name: Project
+        url: /springdoc/openapi3project.json
+
+jwt:
+  secret:
+    key: "7JWI7J6Q7J6Q7IKs7J6Q7YyM7J2067O07J6Q67O07J6Q7IS47JqU7IOB7J6Q7Y6M7KeA7J6Q7Iqk"
+
+#logging:
+#  level:
+#    com.moongoeun.project: DEBUG
+#    root: DEBUG
