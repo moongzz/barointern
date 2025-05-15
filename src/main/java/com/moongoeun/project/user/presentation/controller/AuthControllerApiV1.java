@@ -45,13 +45,14 @@ public class AuthControllerApiV1 {
         @RequestParam String accessToken,
         @RequestParam String refreshToken
     ) {
-        ResAuthGetRefreshDTOApiV1 data = ResAuthGetRefreshDTOApiV1.of("");
+        ResAuthGetRefreshDTOApiV1 newAccessToken = authServiceApiV1.refreshBy(accessToken,
+            refreshToken);
 
         return new ResponseEntity<>(
             ResDTO.<ResAuthGetRefreshDTOApiV1>builder()
                 .code("0")
                 .message("Access Token 재발급 성공했습니다.")
-                .data(data)
+                .data(newAccessToken)
                 .build(),
             HttpStatus.OK
         );
