@@ -25,6 +25,8 @@ public enum AuthExceptionCode implements ExceptionCode {
     INVALID_SIGNATURE("A406", "유효하지 않은 JWT 서명 입니다.", HttpStatus.UNAUTHORIZED),
 
     USER_NOT_FOUND("A501", "존재하지 않는 회원 아이디입니다.", HttpStatus.NOT_FOUND),
+
+    ACCESS_DENIED("A601", "권한이 없습니다.", HttpStatus.FORBIDDEN),
     ;
 
     private final String code;
